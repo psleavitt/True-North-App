@@ -130,10 +130,22 @@ textarea.txt{resize:vertical;min-height:56px;line-height:1.4}
 .empty{color:var(--dim);text-align:center;font-size:14px;padding:26px 10px;line-height:1.5}
 .linkish{background:none;border:none;color:var(--dusk);font-family:inherit;font-size:13px;text-decoration:underline;cursor:pointer;display:block;margin:12px auto 0}
 
-@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+/* sync status pill */
+.syncpill{position:fixed;top:12px;right:12px;display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--dusk);cursor:pointer;z-index:9}
+.syncpill .d{width:8px;height:8px;border-radius:50%;background:#5a6288;flex-shrink:0}
+.syncpill.ok .d{background:#7fc98f}
+.syncpill.syncing .d{background:var(--star);animation:pulse 1s ease-in-out infinite}
+.syncpill.pending .d{background:#d98080}
+.syncpill:focus-visible{outline:2px solid var(--star);outline-offset:2px}
+@keyframes pulse{50%{opacity:.3}}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
+<button class="syncpill off" id="syncDot" onclick="go('sync')" aria-label="Sync status — open setup">
+  <span class="d"></span><span class="lbl">Local only</span>
+</button>
 <div class="wrap">
   <header>
     <span class="mark">✦</span>
@@ -147,7 +159,7 @@ textarea.txt{resize:vertical;min-height:56px;line-height:1.4}
 <script>
 /* ================= CONFIG ================= */
 const SUPABASE_URL = 'https://ctxnyfgdiugzhskumqpm.supabase.co';
-const SUPABASE_KEY = 'PASTE_YOUR_ANON_KEY_HERE'; // copy the anon key from First Light / Rack / Tamarron
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0eG55ZmdkaXVnemhza3VtcXBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxODUxNzgsImV4cCI6MjA5ODc2MTE3OH0.waXx4gHFKwRJWNloGRhIpe7TH5UVn1N_jPLgaAn2oEY';
 const TABLE = 'truenorth_entries';
 
 const DEFAULT_VALUES = [
@@ -278,10 +290,25 @@ function sbHeaders(){
 }
 function newer(a,b){ return (Date.parse(a)||0) > (Date.parse(b)||0); }
 function pendingCount(){ return Object.keys(store.pending||{}).length + (store.configPending?1:0); }
+let syncBusy = 0;
+function setBusy(d){ syncBusy = Math.max(0, syncBusy+d); updateSyncDot(); }
+function updateSyncDot(){
+  const el = document.getElementById('syncDot');
+  if(!el) return;
+  let cls='off', label='Local only';
+  if(hasKey() && store.syncCode){
+    if(syncBusy>0){ cls='syncing'; label='Syncing\u2026'; }
+    else if(pendingCount()>0){ const n=pendingCount(); cls='pending'; label=n+' pending'; }
+    else { cls='ok'; label='Synced'; }
+  }
+  el.className = 'syncpill '+cls;
+  el.querySelector('.lbl').textContent = label;
+}
 async function pushEntry(ds){
   if(!hasKey() || !store.syncCode) return false;
   const e = store.entries[ds];
   if(!e) return true;
+  setBusy(1);
   try{
     const r = await fetch(SUPABASE_URL+'/rest/v1/'+TABLE+'?on_conflict=sync_code,entry_date',{
       method:'POST',
@@ -296,7 +323,7 @@ async function pushEntry(ds){
     store.pending[ds] = true;
     save();
     return false;
-  }
+  }finally{ setBusy(-1); }
 }
 async function pushAll(){
   let fails = 0;
@@ -313,6 +340,7 @@ window.addEventListener('online', ()=>{ retryPending(); });
 const CONFIG_TABLE = 'truenorth_config';
 async function pushConfig(){
   if(!hasKey() || !store.syncCode) return false;
+  setBusy(1);
   try{
     const r = await fetch(SUPABASE_URL+'/rest/v1/'+CONFIG_TABLE+'?on_conflict=sync_code',{
       method:'POST',
@@ -326,10 +354,11 @@ async function pushConfig(){
     store.configPending = true;
     save();
     return false;
-  }
+  }finally{ setBusy(-1); }
 }
 async function pullConfig(){
   if(!hasKey() || !store.syncCode) return false;
+  setBusy(1);
   try{
     const r = await fetch(SUPABASE_URL+'/rest/v1/'+CONFIG_TABLE+'?sync_code=eq.'+encodeURIComponent(store.syncCode)+'&select=values,updated_at',{headers:sbHeaders()});
     if(!r.ok) return false;
@@ -342,23 +371,27 @@ async function pullConfig(){
       return true;
     }
   }catch(err){}
+  finally{ setBusy(-1); }
   return false;
 }
 async function pullAll(){
   if(!hasKey() || !store.syncCode) return 0;
-  const r = await fetch(SUPABASE_URL+'/rest/v1/'+TABLE+'?sync_code=eq.'+encodeURIComponent(store.syncCode)+'&select=entry_date,scores,updated_at',{headers:sbHeaders()});
-  if(!r.ok) throw new Error('pull failed');
-  const rows = await r.json();
-  let merged=0;
-  rows.forEach(row=>{
-    const local = store.entries[row.entry_date];
-    if(!local || newer(row.updated_at, local.updatedAt)){
-      store.entries[row.entry_date] = {scores:row.scores, updatedAt:row.updated_at||new Date().toISOString()};
-      merged++;
-    }
-  });
-  save();
-  return merged;
+  setBusy(1);
+  try{
+    const r = await fetch(SUPABASE_URL+'/rest/v1/'+TABLE+'?sync_code=eq.'+encodeURIComponent(store.syncCode)+'&select=entry_date,scores,updated_at',{headers:sbHeaders()});
+    if(!r.ok) throw new Error('pull failed');
+    const rows = await r.json();
+    let merged=0;
+    rows.forEach(row=>{
+      const local = store.entries[row.entry_date];
+      if(!local || newer(row.updated_at, local.updatedAt)){
+        store.entries[row.entry_date] = {scores:row.scores, updatedAt:row.updated_at||new Date().toISOString()};
+        merged++;
+      }
+    });
+    save();
+    return merged;
+  }finally{ setBusy(-1); }
 }
 
 /* ================= RENDER ================= */
@@ -670,6 +703,7 @@ function newCode(){
 async function saveCode(){
   store.syncCode = $('codeInput').value.trim().toUpperCase();
   save();
+  updateSyncDot();
   const s=$('syncStatus');
   if(!store.syncCode){ s.textContent='Sync code cleared.'; return; }
   if(!hasKey()){ s.textContent='Code saved. Add your anon key to enable syncing.'; return; }
@@ -701,6 +735,7 @@ async function doPushAll(){
 
 /* ================= INIT ================= */
 render();
+updateSyncDot();
 if(hasKey() && store.syncCode){
   Promise.all([pullAll(), pullConfig()]).then(([n,cfg])=>{
     if((n>0||cfg) && !session) render();
