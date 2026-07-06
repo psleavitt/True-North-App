@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>True North · Nightly Values Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky:#0e1326;
+  --panel:#171e37;
+  --panel2:#1e2745;
+  --line:#2a3355;
+  --star:#e8c46b;
+  --star-soft:rgba(232,196,107,.16);
+  --moon:#eceaf2;
+  --dusk:#8f97ba;
+  --dim:#5a6288;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{
+  background:var(--sky);
+  background-image:radial-gradient(1200px 600px at 50% -10%, #1a2244 0%, var(--sky) 60%);
+  color:var(--moon);
+  font-family:'Source Sans 3',system-ui,sans-serif;
+  min-height:100vh;
+  padding-bottom:60px;
+}
+.wrap{max-width:520px;margin:0 auto;padding:0 18px}
+
+/* header */
+header{padding:26px 0 10px;text-align:center}
+.mark{color:var(--star);font-size:20px;letter-spacing:.35em;text-indent:.35em;display:block;margin-bottom:2px}
+h1{font-family:'Fraunces',serif;font-weight:600;font-size:30px;letter-spacing:.01em}
+.tagline{color:var(--dusk);font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin-top:4px}
+
+/* tabs */
+nav{display:flex;gap:6px;margin:18px 0 20px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px}
+nav button{flex:1;background:none;border:none;border-radius:999px;color:var(--dusk);font-family:inherit;font-size:14px;font-weight:600;padding:9px 0;cursor:pointer;transition:background .18s,color .18s}
+nav button.on{background:var(--star);color:#241d0c}
+nav button:focus-visible{outline:2px solid var(--star);outline-offset:2px}
+
+/* cards */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+.card h2{font-family:'Fraunces',serif;font-weight:600;font-size:21px;margin-bottom:4px}
+.sub{color:var(--dusk);font-size:14px;line-height:1.45}
+.eyebrow{color:var(--star);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:6px}
+
+.btn{display:block;width:100%;background:var(--star);color:#241d0c;border:none;border-radius:12px;font-family:inherit;font-size:16px;font-weight:700;padding:14px;cursor:pointer;margin-top:14px}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--dusk);font-weight:600}
+.btn:focus-visible,.pill:focus-visible{outline:2px solid var(--moon);outline-offset:2px}
+.btn[disabled]{opacity:.35;cursor:default}
+.row2{display:flex;gap:10px}
+.row2 .btn{flex:1}
+
+/* stat strip */
+.strip{display:flex;gap:10px;margin-bottom:14px}
+.stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 10px;text-align:center}
+.stat .num{font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--star)}
+.stat .lbl{color:var(--dusk);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+
+/* focus banner */
+.focus{background:var(--star-soft);border:1px solid rgba(232,196,107,.4);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px}
+.focus b{color:var(--star)}
+.focus p{font-size:14px;color:var(--moon);line-height:1.45}
+
+/* review session */
+.progress{height:4px;background:var(--panel2);border-radius:99px;margin:4px 0 18px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--star);border-radius:99px;transition:width .25s}
+.vname{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:32px;text-align:center;color:var(--star);margin:6px 0 2px}
+.vcount{text-align:center;color:var(--dim);font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px}
+.q{margin-bottom:20px}
+.q p{font-size:15.5px;line-height:1.5;margin-bottom:10px}
+.pills{display:flex;gap:8px;justify-content:space-between}
+.pill{width:42px;height:42px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--dusk);font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.pill.on{background:var(--star);border-color:var(--star);color:#241d0c}
+.pill.na{font-size:11px;letter-spacing:.02em}
+.pill.na.on{background:var(--dusk);border-color:var(--dusk);color:#10152a}
+.anchors{display:flex;justify-content:space-between;color:var(--dim);font-size:11px;margin-top:6px}
+
+/* score bars */
+.vrow{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.vrow .nm{width:104px;font-size:14px;color:var(--moon)}
+.vrow .bar{flex:1;height:8px;background:var(--panel2);border-radius:99px;overflow:hidden}
+.vrow .bar i{display:block;height:100%;background:var(--star);border-radius:99px}
+.vrow .sc{width:34px;text-align:right;font-size:14px;font-weight:700;color:var(--star);font-variant-numeric:tabular-nums}
+.bignum{font-family:'Fraunces',serif;font-size:56px;font-weight:600;color:var(--star);text-align:center;line-height:1}
+.bignum small{font-size:20px;color:var(--dusk)}
+.center{text-align:center}
+
+/* week nav */
+.wknav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.wknav button{background:var(--panel);border:1px solid var(--line);color:var(--dusk);border-radius:10px;width:38px;height:38px;font-size:17px;cursor:pointer}
+.wknav .ttl{font-family:'Fraunces',serif;font-size:18px;font-weight:600}
+.wknav button[disabled]{opacity:.3;cursor:default}
+
+svg text{font-family:'Source Sans 3',sans-serif}
+.dots{display:flex;gap:5px;justify-content:center;margin-top:10px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--panel2);border:1px solid var(--line)}
+.dot.on{background:var(--star);border-color:var(--star)}
+.daylbl{display:flex;gap:5px;justify-content:center;margin-top:4px}
+.daylbl span{width:9px;text-align:center;font-size:8px;color:var(--dim)}
+
+/* trend list */
+.trow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.trow:last-child{border:none}
+.trow .sc{font-weight:700;color:var(--star);font-variant-numeric:tabular-nums}
+
+/* sync */
+input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--moon);font-family:inherit;font-size:16px;padding:12px;letter-spacing:.12em;text-transform:uppercase;text-align:center}
+input[type=text]:focus{outline:2px solid var(--star)}
+
+/* values editor */
+.txt{display:block;width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--moon);font-family:inherit;font-size:15px;padding:11px;margin-bottom:8px;letter-spacing:normal;text-transform:none;text-align:left}
+textarea.txt{resize:vertical;min-height:56px;line-height:1.4}
+.txt:focus{outline:2px solid var(--star)}
+.vitem{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.vitem:last-of-type{border-bottom:none}
+.vitem .nm{flex:1;font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.icobtn{background:var(--panel2);border:1px solid var(--line);color:var(--dusk);border-radius:8px;width:34px;height:34px;font-size:12px;cursor:pointer;flex-shrink:0}
+.icobtn:disabled{opacity:.3;cursor:default}
+.icobtn:focus-visible,.editbtn:focus-visible{outline:2px solid var(--star);outline-offset:2px}
+.editbtn{background:none;border:1px solid var(--line);color:var(--dusk);border-radius:8px;padding:7px 13px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0}
+.danger{color:#d98080;border-color:rgba(217,128,128,.45)}
+.status{font-size:13px;color:var(--dusk);text-align:center;margin-top:10px;min-height:18px}
+.empty{color:var(--dim);text-align:center;font-size:14px;padding:26px 10px;line-height:1.5}
+.linkish{background:none;border:none;color:var(--dusk);font-family:inherit;font-size:13px;text-decoration:underline;cursor:pointer;display:block;margin:12px auto 0}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="mark">✦</span>
+    <h1>True North</h1>
+    <div class="tagline">Nightly Values Review</div>
+  </header>
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+/* ================= CONFIG ================= */
+const SUPABASE_URL = 'https://ctxnyfgdiugzhskumqpm.supabase.co';
+const SUPABASE_KEY = 'PASTE_YOUR_ANON_KEY_HERE'; // copy the anon key from First Light / Rack / Tamarron
+const TABLE = 'truenorth_entries';
+
+const DEFAULT_VALUES = [
+ {id:'integrity',   name:'Integrity',   qs:[
+   'Were my actions aligned with my words and commitments today?',
+   'Was I fully honest in my interactions, even when it was uncomfortable?',
+   'Did I do the right thing even when no one was watching?']},
+ {id:'courage',     name:'Courage',     qs:[
+   'Did I step outside my comfort zone or face something difficult?',
+   'Did I speak up for what\u2019s right when it mattered?',
+   'Did I act despite fear or uncertainty instead of avoiding?']},
+ {id:'compassion',  name:'Compassion',  qs:[
+   'Did I truly listen and seek to understand others?',
+   'Did I respond with patience and kindness, even when frustrated?',
+   'Did I notice someone struggling and reach out?']},
+ {id:'generosity',  name:'Generosity',  qs:[
+   'Did I freely give my time, attention, or resources?',
+   'Did I serve without expecting anything in return?',
+   'Did I actively look for chances to lift someone?']},
+ {id:'temperance',  name:'Temperance',  qs:[
+   'Did I exercise self-control over my habits (screens, food, media)?',
+   'Did I keep my emotions measured under stress?',
+   'Did I keep balance across faith, family, work, and rest?']},
+ {id:'persistence', name:'Persistence', qs:[
+   'Did I follow through on what I committed to do today?',
+   'Did I push through hard or tedious tasks instead of quitting?',
+   'Did I make real progress on a long-term goal?']},
+ {id:'friendliness',name:'Friendliness',qs:[
+   'Was I warm and approachable with the people I encountered?',
+   'Did I strengthen a relationship today?',
+   'Did I make someone feel seen or valued?']}
+];
+
+/* ================= STATE ================= */
+const LS_KEY = 'truenorth-data';
+let store = load();
+if(!store.values){
+  store.values = JSON.parse(JSON.stringify(DEFAULT_VALUES));
+  store.valuesUpdatedAt = new Date().toISOString();
+  save();
+}
+let VALUES = store.values;
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function load(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {entries:{},syncCode:''}; }
+  catch(e){ return {entries:{},syncCode:''}; }
+}
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(store)); }
+
+let tab = 'tonight';
+let session = null;          // {date, idx, answers:{valueId:[a,a,a]}}
+let editingValue = null;     // null | 'new' | value id
+let weekOffset = 0;          // 0 = current week, -1 = last week...
+let justFinished = null;     // date string of a review just completed
+
+/* ================= DATE HELPERS ================= */
+function dstr(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function parseD(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function today(){ return dstr(new Date()); }
+function addDays(s,n){ const d=parseD(s); d.setDate(d.getDate()+n); return dstr(d); }
+function weekStart(s){ const d=parseD(s); d.setDate(d.getDate()-d.getDay()); return dstr(d); }
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtShort(s){ const d=parseD(s); return MONTHS[d.getMonth()]+' '+d.getDate(); }
+function fmtRange(sun){ return fmtShort(sun)+' \u2013 '+fmtShort(addDays(sun,6)); }
+
+/* ================= SCORING ================= */
+function valueScore(entry,vid){
+  const a = entry.scores[vid];
+  if(!a) return null;
+  const vals = a.filter(x=>x!=null && x>0); // 0 = N/A, excluded from scoring
+  return vals.length ? vals.reduce((t,x)=>t+x,0)/vals.length : null;
+}
+function dayComposite(entry){
+  let t=0,n=0;
+  Object.keys(entry.scores).forEach(vid=>{ const s=valueScore(entry,vid); if(s!=null){t+=s;n++;} });
+  return n? t/n : null;
+}
+function weekData(sun){
+  const perValue={}, days=[], comps=[];
+  VALUES.forEach(v=>perValue[v.id]=[]);
+  for(let i=0;i<7;i++){
+    const ds=addDays(sun,i), e=store.entries[ds];
+    days.push(!!e);
+    if(e){
+      VALUES.forEach(v=>{ const s=valueScore(e,v.id); if(s!=null) perValue[v.id].push(s); });
+      const c=dayComposite(e); if(c!=null) comps.push(c);
+    }
+  }
+  const avg={};
+  VALUES.forEach(v=>{
+    const arr=perValue[v.id];
+    avg[v.id]=arr.length? arr.reduce((a,b)=>a+b,0)/arr.length : null;
+  });
+  return {avg, composite: comps.length? comps.reduce((a,b)=>a+b,0)/comps.length : null, daysDone: days.filter(Boolean).length, days};
+}
+function streak(){
+  let s=0, d=today();
+  if(!store.entries[d]) d=addDays(d,-1);
+  while(store.entries[d]){ s++; d=addDays(d,-1); }
+  return s;
+}
+function focusValue(){
+  // lowest average from the most recent completed week (last Sun–Sat) that has data
+  let sun = addDays(weekStart(today()),-7);
+  for(let k=0;k<4;k++){
+    const wd = weekData(sun);
+    if(wd.daysDone>0){
+      let low=null,lowV=null;
+      VALUES.forEach(v=>{ if(wd.avg[v.id]!=null && (low==null||wd.avg[v.id]<low)){low=wd.avg[v.id];lowV=v;} });
+      return lowV? {value:lowV,score:low,week:sun} : null;
+    }
+    sun = addDays(sun,-7);
+  }
+  return null;
+}
+function allWeeks(){
+  const sundays = new Set();
+  Object.keys(store.entries).forEach(ds=>sundays.add(weekStart(ds)));
+  return [...sundays].sort();
+}
+
+/* ================= SUPABASE SYNC ================= */
+function hasKey(){ return SUPABASE_KEY && SUPABASE_KEY.indexOf('PASTE')===-1; }
+function sbHeaders(){
+  return {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'};
+}
+function newer(a,b){ return (Date.parse(a)||0) > (Date.parse(b)||0); }
+function pendingCount(){ return Object.keys(store.pending||{}).length + (store.configPending?1:0); }
+async function pushEntry(ds){
+  if(!hasKey() || !store.syncCode) return false;
+  const e = store.entries[ds];
+  if(!e) return true;
+  try{
+    const r = await fetch(SUPABASE_URL+'/rest/v1/'+TABLE+'?on_conflict=sync_code,entry_date',{
+      method:'POST',
+      headers:{...sbHeaders(),'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify({sync_code:store.syncCode, entry_date:ds, scores:e.scores, updated_at:e.updatedAt})
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    if(store.pending && store.pending[ds]){ delete store.pending[ds]; save(); }
+    return true;
+  }catch(err){
+    store.pending = store.pending || {};
+    store.pending[ds] = true;
+    save();
+    return false;
+  }
+}
+async function pushAll(){
+  let fails = 0;
+  for(const ds of Object.keys(store.entries)){ if(!await pushEntry(ds)) fails++; }
+  return fails;
+}
+async function retryPending(){
+  if(!hasKey() || !store.syncCode) return;
+  for(const ds of Object.keys(store.pending||{})) await pushEntry(ds);
+  if(store.configPending) await pushConfig();
+  if(tab==='sync' && !session && !editingValue) render();
+}
+window.addEventListener('online', ()=>{ retryPending(); });
+const CONFIG_TABLE = 'truenorth_config';
+async function pushConfig(){
+  if(!hasKey() || !store.syncCode) return false;
+  try{
+    const r = await fetch(SUPABASE_URL+'/rest/v1/'+CONFIG_TABLE+'?on_conflict=sync_code',{
+      method:'POST',
+      headers:{...sbHeaders(),'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify({sync_code:store.syncCode, values:store.values, updated_at:store.valuesUpdatedAt||new Date().toISOString()})
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    if(store.configPending){ store.configPending=false; save(); }
+    return true;
+  }catch(err){
+    store.configPending = true;
+    save();
+    return false;
+  }
+}
+async function pullConfig(){
+  if(!hasKey() || !store.syncCode) return false;
+  try{
+    const r = await fetch(SUPABASE_URL+'/rest/v1/'+CONFIG_TABLE+'?sync_code=eq.'+encodeURIComponent(store.syncCode)+'&select=values,updated_at',{headers:sbHeaders()});
+    if(!r.ok) return false;
+    const rows = await r.json();
+    if(rows.length && rows[0].values && newer(rows[0].updated_at, store.valuesUpdatedAt)){
+      store.values = rows[0].values;
+      store.valuesUpdatedAt = rows[0].updated_at;
+      VALUES = store.values;
+      save();
+      return true;
+    }
+  }catch(err){}
+  return false;
+}
+async function pullAll(){
+  if(!hasKey() || !store.syncCode) return 0;
+  const r = await fetch(SUPABASE_URL+'/rest/v1/'+TABLE+'?sync_code=eq.'+encodeURIComponent(store.syncCode)+'&select=entry_date,scores,updated_at',{headers:sbHeaders()});
+  if(!r.ok) throw new Error('pull failed');
+  const rows = await r.json();
+  let merged=0;
+  rows.forEach(row=>{
+    const local = store.entries[row.entry_date];
+    if(!local || newer(row.updated_at, local.updatedAt)){
+      store.entries[row.entry_date] = {scores:row.scores, updatedAt:row.updated_at||new Date().toISOString()};
+      merged++;
+    }
+  });
+  save();
+  return merged;
+}
+
+/* ================= RENDER ================= */
+const $ = id=>document.getElementById(id);
+const NAV = [['tonight','Tonight'],['week','Week'],['trends','Trends'],['sync','Setup']];
+
+function render(){
+  $('nav').innerHTML = NAV.map(([id,lbl])=>
+    `<button class="${tab===id?'on':''}" onclick="go('${id}')">${lbl}</button>`).join('');
+  const m = $('main');
+  if(session) return renderSession(m);
+  if(tab==='tonight') renderTonight(m);
+  else if(tab==='week') renderWeek(m);
+  else if(tab==='trends') renderTrends(m);
+  else renderSync(m);
+}
+function go(t){ tab=t; session=null; justFinished=null; editingValue=null; weekOffset=0; render(); window.scrollTo(0,0); }
+
+/* ---------- Tonight ---------- */
+function renderTonight(m){
+  const t = today(), entry = store.entries[t], st = streak();
+  let html = '';
+
+  html += `<div class="strip">
+    <div class="stat"><div class="num">${st}</div><div class="lbl">Night streak</div></div>
+    <div class="stat"><div class="num">${weekData(weekStart(t)).daysDone}<span style="font-size:15px;color:var(--dusk)">/7</span></div><div class="lbl">This week</div></div>
+    <div class="stat"><div class="num">${Object.keys(store.entries).length}</div><div class="lbl">Total reviews</div></div>
+  </div>`;
+
+  const f = focusValue();
+  if(f) html += `<div class="focus"><p><b>✦ This week\u2019s focus: ${f.value.name}</b><br>
+    Your lowest score last week (${f.score.toFixed(1)}). Give it extra attention each day.</p></div>`;
+
+  if(justFinished===t || entry){
+    const comp = dayComposite(entry);
+    html += `<div class="card">
+      <div class="eyebrow">${justFinished? 'Review complete':'Tonight\u2019s review'} · ${fmtShort(t)}</div>
+      <div class="bignum">${comp!=null? comp.toFixed(1):'–'}<small> / 5</small></div>
+      <p class="sub center" style="margin:6px 0 16px">Composite across all seven values</p>
+      ${VALUES.map(v=>{
+        const s=valueScore(entry,v.id);
+        return `<div class="vrow"><div class="nm">${v.name}</div>
+          <div class="bar"><i style="width:${s!=null? s/5*100:0}%"></i></div>
+          <div class="sc">${s!=null? s.toFixed(1):'N/A'}</div></div>`;
+      }).join('')}
+      <button class="btn ghost" onclick="startReview('${t}')">Edit tonight\u2019s review</button>
+    </div>`;
+  } else {
+    html += `<div class="card center">
+      <h2>Evening reflection</h2>
+      <p class="sub" style="margin-top:6px">Twenty-one questions. Seven values.<br>A few honest minutes before you close the day.</p>
+      <button class="btn" onclick="startReview('${t}')">Begin tonight\u2019s review</button>
+    </div>`;
+  }
+
+  const y = addDays(t,-1);
+  if(!store.entries[y]){
+    html += `<button class="linkish" onclick="startReview('${y}')">Missed last night? Review yesterday</button>`;
+  }
+  m.innerHTML = html;
+}
+
+/* ---------- Review session ---------- */
+function startReview(ds){
+  const vsnap = VALUES.map(v=>({id:v.id, name:v.name, qs:[...v.qs]}));
+  const existing = store.entries[ds];
+  const answers = {};
+  vsnap.forEach(v=>answers[v.id] = existing? [...(existing.scores[v.id]||[null,null,null])] : [null,null,null]);
+  session = {date:ds, idx:0, answers, values:vsnap};
+  render(); window.scrollTo(0,0);
+}
+function setAns(vid,qi,val){ session.answers[vid][qi]=val; render(); }
+function stepSession(dir){
+  session.idx += dir;
+  if(session.idx >= session.values.length){ finishSession(); return; }
+  if(session.idx < 0) session.idx = 0;
+  render(); window.scrollTo(0,0);
+}
+function cancelSession(){ session=null; render(); }
+function finishSession(){
+  const ds = session.date;
+  store.entries[ds] = {scores:session.answers, updatedAt:new Date().toISOString()};
+  save();
+  pushEntry(ds);
+  session=null; justFinished=ds; tab='tonight';
+  render(); window.scrollTo(0,0);
+}
+function renderSession(m){
+  const V = session.values;
+  const v = V[session.idx], a = session.answers[v.id];
+  const done = a.every(x=>x!=null);
+  const pct = (session.idx)/V.length*100;
+  m.innerHTML = `
+  <div class="progress"><i style="width:${pct}%"></i></div>
+  <div class="vcount">Value ${session.idx+1} of ${V.length} · ${fmtShort(session.date)}</div>
+  <div class="vname">${v.name}</div>
+  <div class="card">
+    ${v.qs.map((q,qi)=>{
+      const qe = esc(q);
+      return `
+      <div class="q">
+        <p>${qe}</p>
+        <div class="pills">
+          ${[1,2,3,4,5].map(n=>`<button class="pill ${a[qi]===n?'on':''}" onclick="setAns('${v.id}',${qi},${n})" aria-label="${qe} — ${n} of 5">${n}</button>`).join('')}
+          <button class="pill na ${a[qi]===0?'on':''}" onclick="setAns('${v.id}',${qi},0)" aria-label="${qe} — not applicable">N/A</button>
+        </div>
+        <div class="anchors"><span>Fell short</span><span>Lived it</span><span>No opportunity</span></div>
+      </div>`;}).join('')}
+  </div>
+  <div class="row2">
+    <button class="btn ghost" onclick="${session.idx===0? 'cancelSession()':'stepSession(-1)'}">${session.idx===0?'Cancel':'Back'}</button>
+    <button class="btn" ${done?'':'disabled'} onclick="stepSession(1)">${session.idx===session.values.length-1?'Finish':'Next'}</button>
+  </div>`;
+}
+
+/* ---------- Week ---------- */
+function renderWeek(m){
+  const sun = addDays(weekStart(today()), weekOffset*7);
+  const wd = weekData(sun);
+  const isCurrent = weekOffset===0;
+  let html = `<div class="wknav">
+    <button onclick="weekOffset--;render()" aria-label="Previous week">‹</button>
+    <div class="ttl">Week of ${fmtRange(sun)}</div>
+    <button ${isCurrent?'disabled':''} onclick="weekOffset++;render()" aria-label="Next week">›</button>
+  </div>`;
+
+  if(wd.daysDone===0){
+    html += `<div class="card"><div class="empty">No reviews recorded this week yet.<br>Your constellation appears as you review each night.</div></div>`;
+  } else {
+    html += `<div class="card center">
+      <div class="eyebrow">Your constellation</div>
+      ${radarSVG(wd.avg)}
+      <div class="bignum" style="font-size:40px;margin-top:6px">${wd.composite.toFixed(1)}<small> / 5</small></div>
+      <p class="sub">Weekly composite · ${wd.daysDone} of 7 nights reviewed</p>
+      <div class="dots">${wd.days.map(d=>`<span class="dot ${d?'on':''}"></span>`).join('')}</div>
+      <div class="daylbl">${['S','M','T','W','T','F','S'].map(d=>`<span>${d}</span>`).join('')}</div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">By value</div>
+      ${VALUES.map(v=>{
+        const s=wd.avg[v.id];
+        return `<div class="vrow"><div class="nm">${v.name}</div>
+          <div class="bar"><i style="width:${s!=null? s/5*100:0}%"></i></div>
+          <div class="sc">${s!=null? s.toFixed(1):'–'}</div></div>`;
+      }).join('')}
+    </div>`;
+  }
+  m.innerHTML = html;
+}
+
+function radarSVG(avg){
+  const cx=150, cy=128, R=92, N=VALUES.length;
+  const pt=(i,r)=>{
+    const ang = -Math.PI/2 + i*2*Math.PI/N;
+    return [cx + r*Math.cos(ang), cy + r*Math.sin(ang)];
+  };
+  let grid='';
+  for(let ring=1; ring<=5; ring++){
+    const pts = VALUES.map((_,i)=>pt(i,R*ring/5).join(',')).join(' ');
+    grid += `<polygon points="${pts}" fill="none" stroke="#2a3355" stroke-width="${ring===5?1.2:0.6}"/>`;
+  }
+  let axes = VALUES.map((_,i)=>{
+    const [x,y]=pt(i,R); return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#232c4c" stroke-width="0.6"/>`;
+  }).join('');
+  let labels = VALUES.map((v,i)=>{
+    const [x,y]=pt(i,R+20);
+    const anchor = Math.abs(x-cx)<8? 'middle' : (x>cx?'start':'end');
+    return `<text x="${x}" y="${y+3}" text-anchor="${anchor}" font-size="10.5" fill="#8f97ba">${v.name}</text>`;
+  }).join('');
+  const dataPts = VALUES.map((v,i)=>pt(i, R*((avg[v.id]||0)/5)));
+  const poly = dataPts.map(p=>p.join(',')).join(' ');
+  const stars = dataPts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.2" fill="#e8c46b"/>`).join('');
+  return `<svg viewBox="0 0 300 262" width="100%" role="img" aria-label="Weekly values radar chart">
+    ${grid}${axes}
+    <polygon points="${poly}" fill="rgba(232,196,107,.18)" stroke="#e8c46b" stroke-width="1.6" stroke-linejoin="round"/>
+    ${stars}${labels}
+  </svg>`;
+}
+
+/* ---------- Trends ---------- */
+function renderTrends(m){
+  const weeks = allWeeks();
+  const rows = weeks.map(sun=>({sun, wd:weekData(sun)})).filter(r=>r.wd.composite!=null);
+  if(rows.length===0){
+    m.innerHTML = `<div class="card"><div class="empty">Your long-term trend will appear here<br>after your first week of reviews.</div></div>`;
+    return;
+  }
+  let html = `<div class="card">
+    <div class="eyebrow">Weekly composite over time</div>
+    ${trendSVG(rows)}
+  </div>
+  <div class="card">
+    <div class="eyebrow">Week by week</div>
+    ${rows.slice().reverse().map(r=>
+      `<div class="trow"><span>Week of ${fmtRange(r.sun)}</span>
+       <span class="sub">${r.wd.daysDone}/7</span>
+       <span class="sc">${r.wd.composite.toFixed(1)}</span></div>`).join('')}
+  </div>`;
+  m.innerHTML = html;
+}
+function trendSVG(rows){
+  const W=300,H=150,padL=26,padR=12,padT=12,padB=22;
+  const n=rows.length;
+  const x=i=> n===1? (padL+ (W-padL-padR)/2) : padL + i*(W-padL-padR)/(n-1);
+  const y=v=> padT + (5-v)*(H-padT-padB)/4;  // scale 1..5
+  let grid='';
+  for(let g=1;g<=5;g++){
+    grid += `<line x1="${padL}" y1="${y(g)}" x2="${W-padR}" y2="${y(g)}" stroke="#232c4c" stroke-width="0.6"/>
+      <text x="${padL-6}" y="${y(g)+3}" text-anchor="end" font-size="9" fill="#5a6288">${g}</text>`;
+  }
+  const pts = rows.map((r,i)=>[x(i), y(Math.max(1,r.wd.composite))]);
+  const line = n>1? `<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#e8c46b" stroke-width="1.8" stroke-linejoin="round"/>` : '';
+  const dots = pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#e8c46b"/>`).join('');
+  const step = Math.max(1, Math.ceil(n/5));
+  const xlabels = rows.map((r,i)=> i%step===0 || i===n-1 ?
+    `<text x="${x(i)}" y="${H-6}" text-anchor="middle" font-size="8.5" fill="#5a6288">${fmtShort(r.sun)}</text>` : '').join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Weekly composite trend">${grid}${line}${dots}${xlabels}</svg>`;
+}
+
+/* ---------- Setup (values + sync) ---------- */
+function renderSync(m){
+  const keyOk = hasKey();
+  let valuesCard;
+  if(editingValue){
+    const v = editingValue==='new'? null : VALUES.find(x=>x.id===editingValue);
+    valuesCard = valueEditorHTML(v);
+  } else {
+    valuesCard = `<div class="card">
+      <h2>Your values</h2>
+      <p class="sub" style="margin:6px 0 10px">Edit names and questions, reorder, or add new values as priorities shift. Past scores are always preserved.</p>
+      ${VALUES.map((v,i)=>`<div class="vitem">
+        <div class="nm">${esc(v.name)}</div>
+        <button class="icobtn" ${i===0?'disabled':''} onclick="moveValue('${v.id}',-1)" aria-label="Move ${esc(v.name)} up">▲</button>
+        <button class="icobtn" ${i===VALUES.length-1?'disabled':''} onclick="moveValue('${v.id}',1)" aria-label="Move ${esc(v.name)} down">▼</button>
+        <button class="editbtn" onclick="editingValue='${v.id}';render()">Edit</button>
+      </div>`).join('')}
+      <button class="btn ghost" onclick="editingValue='new';render()">+ Add a value</button>
+    </div>`;
+  }
+  m.innerHTML = valuesCard + `<div class="card">
+    <h2>Cloud sync</h2>
+    <p class="sub" style="margin:6px 0 14px">Reviews and your values setup sync to Supabase using a private sync code — same model as First Light, Rack, and Tamarron. Use the same code on each device.</p>
+    ${keyOk? '' : `<p class="sub" style="color:#d98080;margin-bottom:12px">Setup needed: paste your Supabase anon key into SUPABASE_KEY at the top of this file (copy it from First Light).</p>`}
+    <input type="text" id="codeInput" placeholder="SYNC CODE" value="${store.syncCode||''}" maxlength="12" autocomplete="off">
+    <div class="row2">
+      <button class="btn ghost" onclick="newCode()">New code</button>
+      <button class="btn" onclick="saveCode()">Save &amp; pull</button>
+    </div>
+    <button class="btn ghost" onclick="doPushAll()">Push all local data</button>
+    <div class="status" id="syncStatus">${store.syncCode? (pendingCount()>0? pendingCount()+' item'+(pendingCount()===1?'':'s')+' waiting to sync — will retry automatically.' : 'Syncing as '+store.syncCode) : 'No sync code set — data is stored on this device only.'}</div>
+  </div>`;
+}
+function valueEditorHTML(v){
+  const isNew = !v;
+  return `<div class="card">
+    <h2>${isNew? 'Add a value':'Edit value'}</h2>
+    <p class="sub" style="margin:6px 0 4px">Name the value, then write three yes-leaning questions you can honestly score 1–5 each night.</p>
+    <input class="txt" id="vName" placeholder="Value name (e.g., Gratitude)" value="${v? esc(v.name):''}" style="margin-top:8px">
+    ${[0,1,2].map(i=>`<textarea class="txt" id="vQ${i}" placeholder="Question ${i+1}">${v? esc(v.qs[i]):''}</textarea>`).join('')}
+    <div class="row2">
+      <button class="btn ghost" onclick="editingValue=null;render()">Cancel</button>
+      <button class="btn" onclick="saveValue()">Save value</button>
+    </div>
+    ${!isNew? `<button class="btn ghost danger" onclick="deleteValue('${v.id}')">Delete this value</button>`:''}
+  </div>`;
+}
+function saveValue(){
+  const name = $('vName').value.trim();
+  const qs = [0,1,2].map(i=>$('vQ'+i).value.trim());
+  if(!name || qs.some(q=>!q)){ alert('Please fill in the value name and all three questions.'); return; }
+  if(editingValue==='new'){
+    let id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'value';
+    while(VALUES.some(v=>v.id===id)) id += '2';
+    VALUES.push({id,name,qs});
+  } else {
+    const v = VALUES.find(x=>x.id===editingValue);
+    v.name = name; v.qs = qs;
+  }
+  configChanged();
+  editingValue = null;
+  render();
+}
+function deleteValue(id){
+  if(VALUES.length<=3){ alert('Keep at least three values so your charts stay meaningful.'); return; }
+  const v = VALUES.find(x=>x.id===id);
+  if(!confirm('Delete "'+v.name+'"? Past scores stay in your history, but this value will no longer appear in reviews or charts.')) return;
+  VALUES.splice(VALUES.indexOf(v),1);
+  configChanged();
+  editingValue = null;
+  render();
+}
+function moveValue(id,dir){
+  const i = VALUES.findIndex(v=>v.id===id), j = i+dir;
+  if(j<0 || j>=VALUES.length) return;
+  [VALUES[i],VALUES[j]] = [VALUES[j],VALUES[i]];
+  configChanged();
+  render();
+}
+function configChanged(){
+  store.valuesUpdatedAt = new Date().toISOString();
+  save();
+  pushConfig();
+}
+function newCode(){
+  const chars='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let c='';
+  for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  $('codeInput').value=c;
+}
+async function saveCode(){
+  store.syncCode = $('codeInput').value.trim().toUpperCase();
+  save();
+  const s=$('syncStatus');
+  if(!store.syncCode){ s.textContent='Sync code cleared.'; return; }
+  if(!hasKey()){ s.textContent='Code saved. Add your anon key to enable syncing.'; return; }
+  s.textContent='Pulling…';
+  try{
+    const n = await pullAll();
+    const cfgChanged = await pullConfig();
+    const fails = await pushAll();
+    await pushConfig();
+    if(cfgChanged) render();
+    $('syncStatus').textContent = fails>0
+      ? `Synced with issues — ${fails} entr${fails===1?'y':'ies'} couldn\u2019t be pushed (will retry automatically).`
+      : `Synced. ${n} entr${n===1?'y':'ies'} pulled from cloud.`;
+  }catch(e){ $('syncStatus').textContent='Sync failed — check connection and table setup.'; }
+}
+async function doPushAll(){
+  const s=$('syncStatus');
+  if(!store.syncCode || !hasKey()){ s.textContent='Set a sync code (and anon key) first.'; return; }
+  s.textContent='Pushing…';
+  try{
+    const fails = await pushAll();
+    await pushConfig();
+    s.textContent = fails>0
+      ? `${fails} entr${fails===1?'y':'ies'} couldn\u2019t be pushed — will retry when back online.`
+      : 'All local entries pushed.';
+  }
+  catch(e){ s.textContent='Push failed — check connection.'; }
+}
+
+/* ================= INIT ================= */
+render();
+if(hasKey() && store.syncCode){
+  Promise.all([pullAll(), pullConfig()]).then(([n,cfg])=>{
+    if((n>0||cfg) && !session) render();
+    retryPending();
+  }).catch(()=>{});
+}
+</script>
+</body>
+</html>
